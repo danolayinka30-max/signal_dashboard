@@ -115,7 +115,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _lastUpdateId = item['update_id'];
             if (item['message'] != null && item['message']['text'] != null) {
               String text = item['message']['text'];
-              if (text.contains('XAUUSD') || text.contains('SIGNAL')) {
+              if (text.contains('XAUUSD') || text.contains('IKSRR')) {
                 _parseAndAddSignal(text);
               }
             }
@@ -131,15 +131,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   void _parseAndAddSignal(String rawText) {
     try {
-      final parts = rawText.split('|');
       String type = rawText.contains('BUY') ? 'BUY' : 'SELL';
-      double entry = 0.0, sl = 0.0, tp = 0.0;
 
-      for (var part in parts) {
-        if (part.contains('ENTRY:')) entry = double.parse(part.split(':')[1].trim());
-        if (part.contains('SL:')) sl = double.parse(part.split(':')[1].trim());
-        if (part.contains('TP:')) tp = double.parse(part.split(':')[1].trim());
-      }
+      // 🔥 Robust Regex to match exact fields sent by Python script regardless of backticks 🔥
+      final entryMatch = RegExp(r'Entry:\s*[`\*]?([0-9\.]+)[`\*]?').firstMatch(rawText);
+      final slMatch = RegExp(r'Stop Loss:\s*[`\*]?([0-9\.]+)[`\*]?').firstMatch(rawText);
+      final tpMatch = RegExp(r'Take Profit:\s*[`\*]?([0-9\.]+)[`\*]?').firstMatch(rawText);
+
+      double entry = entryMatch != null ? double.parse(entryMatch.group(1)!) : 0.0;
+      double sl = slMatch != null ? double.parse(slMatch.group(1)!) : 0.0;
+      double tp = tpMatch != null ? double.parse(tpMatch.group(1)!) : 0.0;
 
       final signal = Signal(
         symbol: 'XAUUSD',
@@ -257,8 +258,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 ),
                               ),
                             ),
-                            title: Text('${sig.symbol} @ ${sig.entry}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text('SL: ${sig.stopLoss} | TP: ${sig.takeProfit}'),
+                            title: Text('${sig.symbol} @${sig.entry}', style: const TextStyle(fontWeight: FontWeight.bold)),
+                            subtitle: Text('SL: ${sig.stopLoss} \vert{} TP:${sig.takeProfit}'),
                             trailing: Text(sig.timestamp, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
                           ),
                         );
