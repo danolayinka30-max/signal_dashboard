@@ -133,7 +133,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       String type = rawText.contains('BUY') ? 'BUY' : 'SELL';
 
-      // 🔥 Robust Regex to match exact fields sent by Python script regardless of backticks 🔥
       final entryMatch = RegExp(r'Entry:\s*[`\*]?([0-9\.]+)[`\*]?').firstMatch(rawText);
       final slMatch = RegExp(r'Stop Loss:\s*[`\*]?([0-9\.]+)[`\*]?').firstMatch(rawText);
       final tpMatch = RegExp(r'Take Profit:\s*[`\*]?([0-9\.]+)[`\*]?').firstMatch(rawText);
